@@ -193,6 +193,153 @@ html, body { font-size: 16px; height: 100%; background: var(--bg); color: var(--
 .top-tab.active-career .top-tab-label { color: var(--accent-purple); }
 .top-tab.active-career .top-tab-icon { filter: drop-shadow(0 0 5px var(--accent-purple)); }
 
+/* Health home subtabs */
+.sub-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sub-tab {
+  flex: 1;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text3);
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-m);
+}
+.sub-tab:active { transform: scale(0.97); }
+.sub-tab.active {
+  color: var(--accent-green);
+  border-color: var(--accent-green-border);
+  background: var(--accent-green-dim);
+}
+.stats-strip-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 20px 16px;
+}
+.health-meal-expand {
+  display: none;
+  padding: 0 16px 14px 52px;
+  border-top: 1px solid var(--border);
+}
+.health-meal-expand ul {
+  list-style: none;
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.7;
+}
+.health-meal-expand li::before { content: '· '; color: var(--text3); }
+.ex-card.open .health-meal-expand { display: block; }
+.health-variant-toggle {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.health-vt-btn {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text3);
+  cursor: pointer;
+  font-family: var(--font-m);
+}
+.health-vt-btn.active {
+  color: var(--accent-green);
+  border-color: var(--accent-green-border);
+  background: var(--accent-green-dim);
+}
+.health-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 10px;
+  color: var(--text2);
+}
+.health-toggle-chip {
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text3);
+  cursor: pointer;
+}
+.health-toggle-chip.on {
+  color: var(--accent-green);
+  border-color: var(--accent-green-border);
+  background: var(--accent-green-dim);
+}
+.health-supp-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 20px 16px;
+}
+.health-supp-chip {
+  font-size: 10px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.health-supp-chip.done {
+  color: var(--accent-green);
+  border-color: var(--accent-green-border);
+  background: var(--accent-green-dim);
+}
+.health-supp-chip.disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+.history-category { margin-top: 10px; }
+.history-category:first-child { margin-top: 0; }
+.history-cat-label {
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.history-cat-summary {
+  font-size: 11px;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+.history-cat-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+#domain-health .item-card.done {
+  border-color: var(--accent-green-border);
+  background: var(--accent-green-dim);
+}
+#domain-health .item-card.done .item-name {
+  color: var(--text2);
+  text-decoration: line-through;
+  text-decoration-color: var(--text3);
+}
+#domain-health .ex-card.completed { border-color: var(--accent-green-border); }
+#domain-health .ex-card.completed .ex-check { background: var(--accent-green); border-color: var(--accent-green); color: #000; }
+
 /* ============================================================
    DOMAIN WRAPPERS
    ============================================================ */
@@ -956,6 +1103,10 @@ html, body { font-size: 16px; height: 100%; background: var(--bg); color: var(--
         </div>
         <div id="health-date-display" style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;text-align:right;"></div>
       </div>
+      <div class="sub-tabs" id="health-sub-tabs">
+        <div class="sub-tab active" id="health-subtab-diet" onclick="healthSwitchSubtab('diet')">DIET</div>
+        <div class="sub-tab" id="health-subtab-wellness" onclick="healthSwitchSubtab('wellness')">WELLNESS</div>
+      </div>
       <div class="scroll">
         <div class="home-header">
           <div class="greeting" id="health-greeting">STAY <span style="color:var(--accent-green);">SHARP</span></div>
@@ -966,14 +1117,8 @@ html, body { font-size: 16px; height: 100%; background: var(--bg); color: var(--
           <div class="stat-card"><div class="stat-val" id="health-stat-streak" style="color:var(--accent-green);">0</div><div class="stat-lbl">Streak</div></div>
           <div class="stat-card"><div class="stat-val" id="health-stat-total" style="color:var(--accent-green);">0</div><div class="stat-lbl">Total</div></div>
         </div>
-        <div class="section-label">TODAY'S HABITS</div>
-        <div style="padding:0 20px;display:flex;flex-direction:column;gap:10px;" id="health-habit-cards">
-          <div class="empty-state">
-            <div class="empty-icon">🫀</div>
-            <div class="empty-title">No habits yet</div>
-            <div class="empty-sub">Health protocol content<br>coming soon.</div>
-          </div>
-        </div>
+        <div id="health-diet-content"></div>
+        <div id="health-wellness-content" style="display:none;"></div>
         <div style="height:20px;"></div>
       </div>
     </div>
@@ -983,8 +1128,8 @@ html, body { font-size: 16px; height: 100%; background: var(--bg); color: var(--
       <div class="topbar">
         <div><div class="topbar-title">HISTORY</div></div>
         <div style="display:flex;gap:8px;">
-          <button class="icon-btn" id="health-history-select-btn" style="font-size:10px;letter-spacing:1px;">SELECT</button>
-          <button class="icon-btn" id="health-history-delete-btn" style="font-size:10px;letter-spacing:1px;color:var(--red);border-color:#ff474740;display:none;">DELETE</button>
+          <button class="icon-btn" id="health-history-select-btn" onclick="healthToggleHistorySelect()" style="font-size:10px;letter-spacing:1px;">SELECT</button>
+          <button class="icon-btn" id="health-history-delete-btn" onclick="healthDeleteSelectedHistory()" style="font-size:10px;letter-spacing:1px;color:var(--red);border-color:#ff474740;display:none;">DELETE</button>
         </div>
       </div>
       <div class="scroll">
@@ -1099,8 +1244,8 @@ html, body { font-size: 16px; height: 100%; background: var(--bg); color: var(--
       <div class="topbar">
         <div><div class="topbar-title">HISTORY</div></div>
         <div style="display:flex;gap:8px;">
-          <button class="icon-btn" id="career-history-select-btn" style="font-size:10px;letter-spacing:1px;">SELECT</button>
-          <button class="icon-btn" id="career-history-delete-btn" style="font-size:10px;letter-spacing:1px;color:var(--red);border-color:#ff474740;display:none;">DELETE</button>
+          <button class="icon-btn" id="career-history-select-btn" onclick="careerToggleHistorySelect()" style="font-size:10px;letter-spacing:1px;">SELECT</button>
+          <button class="icon-btn" id="career-history-delete-btn" onclick="careerDeleteSelectedHistory()" style="font-size:10px;letter-spacing:1px;color:var(--red);border-color:#ff474740;display:none;">DELETE</button>
         </div>
       </div>
       <div class="scroll">
@@ -1331,6 +1476,62 @@ function showToast(msg) {
 
 function vibrate(pattern) {
   if (navigator.vibrate) navigator.vibrate(pattern);
+}
+
+function getTodayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function formatDateFromKey(key) {
+  const [y, m, day] = key.split('-').map(Number);
+  return formatDate(new Date(y, m - 1, day).toISOString());
+}
+
+function renderGroupedHistory(containerId, entriesByDate, categoryRenderers, categoryOrder, options) {
+  const opts = options || {};
+  const list = document.getElementById(containerId);
+  const dates = Object.keys(entriesByDate).filter(dateKey => {
+    const data = entriesByDate[dateKey];
+    return categoryOrder.some(cat => {
+      const renderer = categoryRenderers[cat];
+      return renderer && renderer(data[cat], data, dateKey);
+    });
+  }).sort().reverse();
+
+  if (!dates.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">${opts.emptyTitle || 'No sessions yet'}</div><div class="empty-sub">${opts.emptySub || 'Complete your first check-in<br>and it\'ll show here.'}</div></div>`;
+    return;
+  }
+
+  const selectMode = !!opts.selectMode;
+  const selectedDates = opts.selectedDates || new Set();
+  const onSelect = opts.onSelect || '';
+  const chipStyle = opts.chipStyle || 'background:var(--accent-green-dim);color:var(--accent-green);border:1px solid var(--accent-green-border);';
+
+  list.innerHTML = dates.map(dateKey => {
+    const data = entriesByDate[dateKey];
+    const isSelected = selectedDates.has(dateKey);
+    let categoriesHtml = '';
+    categoryOrder.forEach(cat => {
+      const renderer = categoryRenderers[cat];
+      if (!renderer) return;
+      const html = renderer(data[cat], data, dateKey);
+      if (!html) return;
+      categoriesHtml += `<div class="history-category"><div class="history-cat-label">${cat.toUpperCase()}</div>${html}</div>`;
+    });
+    if (!categoriesHtml) return '';
+
+    return `<div class="history-card${selectMode ? ' selectable' : ''}${isSelected ? ' selected' : ''}" id="hcard-${dateKey}" data-date="${dateKey}"${selectMode ? ` onclick="${onSelect}('${dateKey}')"` : ''}>
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        ${selectMode ? `<div class="history-select-indicator">${isSelected ? '✓' : ''}</div>` : ''}
+        <div style="flex:1;">
+          <div class="history-date">${formatDateFromKey(dateKey)}</div>
+          ${categoriesHtml}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ============================================================
@@ -2184,10 +2385,134 @@ function gymConfirmAddEx() {
 // ============================================================
 // HEALTH — DATA & STATE
 // ============================================================
-let healthHistory  = JSON.parse(localStorage.getItem('lm_health_history')) || [];
-let healthActiveTab = 'home';
+const HEALTH_DIET_PLAN = {
+  meals: [
+    { id: 'm1', time: '10:00 AM', name: 'Overnight Oats', subtitle: 'Oats · Milk · Curd · Almonds · Chia',
+      ingredients: ['Rolled oats 60g', 'Full fat milk 150ml', 'Curd 100g', 'Banana ½', 'Peanut butter 1tbsp', 'Chia seeds 1tbsp', 'Raisins 15g', 'Honey ½tsp (optional)'] },
+    { id: 'm2', time: '1:30 PM', name: 'Paneer/Soya Salad + Rice/Roti', subtitle: 'Paneer or Soya · Salad · Rice/Roti',
+      hasVariant: true, variants: ['Paneer', 'Soya'],
+      ingredients: { Paneer: ['Paneer 150g', 'Curd 100g', 'Cucumber ½', 'Tomato 1', 'Onion ½', 'Spinach handful', 'Lemon ½', 'Rice 185g or 2 rotis'],
+                     Soya: ['Soya chunks 50g (soaked)', 'Curd 100g', 'Cucumber ½', 'Tomato 1', 'Onion ½', 'Spinach handful', 'Lemon ½', 'Rice 185g or 2 rotis'] } },
+    { id: 'm3', time: '4:00–4:30 PM', name: 'Pre-Workout Snack', subtitle: 'Banana · Curd · Nuts · Coffee',
+      ingredients: ['Banana 1', 'Curd 100g', 'Mixed nuts 20g', 'Black/milk coffee (no sugar)'],
+      hasToggle: true, toggleLabel: 'ABC Smoothie' },
+    { id: 'm4', time: '7:30–8:00 PM', name: 'Post-Workout Dinner', subtitle: 'Eggs or Chicken · Rice/Roti',
+      hasVariant: true, variants: ['Eggs', 'Chicken'],
+      ingredients: { Eggs: ['4 whole eggs', 'Ghee 1tsp', 'Spinach handful', 'Tomato ½', 'Turmeric + pepper pinch', 'Rice 185g or 2 rotis', 'Curd 100g'],
+                     Chicken: ['Shawarma/kabab (outside)', '+2 eggs if needed', 'Rice 185g or 2 rotis', 'Curd 100g'] } },
+  ],
+  supplements: [
+    { id: 's1', name: 'D3 60k IU', frequency: 'weekly', day: 'Sunday' },
+    { id: 's2', name: 'K2-7 MK7', frequency: 'daily' },
+    { id: 's3', name: 'Magnesium', frequency: 'daily' },
+    { id: 's4', name: 'Ashwagandha', frequency: 'daily' },
+    { id: 's5', name: 'Neurobion', frequency: 'daily' },
+  ]
+};
 
-function saveHealthHistory() { localStorage.setItem('lm_health_history', JSON.stringify(healthHistory)); }
+const HEALTH_WELLNESS_HABITS = [
+  { id: 'w1', name: 'Skin Detan', icon: '🧴' },
+  { id: 'w2', name: 'Hair Mask', icon: '💆' },
+  { id: 'w3', name: 'Hair Oiling', icon: '🫗' },
+  { id: 'w4', name: 'Detox Drink', icon: '🥤' },
+  { id: 'w5', name: 'Dry Brushing', icon: '🪥' },
+  { id: 'w6', name: 'Cold Shower', icon: '🚿' },
+];
+
+let healthDietLog     = JSON.parse(localStorage.getItem('lm_health_diet_log'))     || {};
+let healthWellnessLog = JSON.parse(localStorage.getItem('lm_health_wellness_log')) || {};
+let healthActiveTab       = 'home';
+let healthActiveSubtab    = 'diet';
+let healthExpandedMeals   = new Set();
+let healthHistorySelectMode  = false;
+let healthSelectedHistoryDates = new Set();
+
+function saveHealthDietLog()     { localStorage.setItem('lm_health_diet_log',     JSON.stringify(healthDietLog)); }
+function saveHealthWellnessLog() { localStorage.setItem('lm_health_wellness_log', JSON.stringify(healthWellnessLog)); }
+
+function healthGetDietDay(key) {
+  if (!healthDietLog[key]) healthDietLog[key] = { meals: {}, supplements: {} };
+  if (!healthDietLog[key].meals) healthDietLog[key].meals = {};
+  if (!healthDietLog[key].supplements) healthDietLog[key].supplements = {};
+  return healthDietLog[key];
+}
+
+function healthGetMealState(mealId, dayKey) {
+  const meal = HEALTH_DIET_PLAN.meals.find(m => m.id === mealId);
+  const raw = healthGetDietDay(dayKey).meals[mealId];
+  if (meal.hasVariant) {
+    const variant = (raw && raw.variant) || meal.variants[0];
+    return { done: !!(raw && raw.done), variant, smoothie: false };
+  }
+  if (meal.hasToggle) {
+    return { done: !!(raw && raw.done), variant: null, smoothie: !!(raw && raw.smoothie) };
+  }
+  return { done: raw === true, variant: null, smoothie: false };
+}
+
+function healthSupplementDue(supp, dateKey) {
+  if (supp.frequency === 'weekly') {
+    const [y, m, d] = dateKey.split('-').map(Number);
+    const dayName = new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'long' });
+    return dayName === supp.day;
+  }
+  return true;
+}
+
+function healthCountMealsDone(dayKey) {
+  return HEALTH_DIET_PLAN.meals.filter(m => healthGetMealState(m.id, dayKey).done).length;
+}
+
+function healthCountSuppsDone(dayKey) {
+  const day = healthGetDietDay(dayKey);
+  return HEALTH_DIET_PLAN.supplements.filter(s => {
+    if (!healthSupplementDue(s, dayKey)) return false;
+    return !!day.supplements[s.id];
+  }).length;
+}
+
+function healthCountSuppsDue(dayKey) {
+  return HEALTH_DIET_PLAN.supplements.filter(s => healthSupplementDue(s, dayKey)).length;
+}
+
+function healthDayHasActivity(dateKey) {
+  const wellness = healthWellnessLog[dateKey];
+  if (wellness && wellness.length > 0) return true;
+  const diet = healthDietLog[dateKey];
+  if (!diet) return false;
+  for (const m of HEALTH_DIET_PLAN.meals) {
+    const st = healthGetMealState(m.id, dateKey);
+    if (st.done) return true;
+  }
+  for (const s of HEALTH_DIET_PLAN.supplements) {
+    if (diet.supplements && diet.supplements[s.id]) return true;
+  }
+  return false;
+}
+
+function healthGetAllActiveDates() {
+  const dates = new Set();
+  Object.keys(healthDietLog).forEach(k => { if (healthDayHasActivity(k)) dates.add(k); });
+  Object.keys(healthWellnessLog).forEach(k => { if (healthWellnessLog[k] && healthWellnessLog[k].length) dates.add(k); });
+  return [...dates];
+}
+
+function healthGetStreak() {
+  const dateSet = new Set(healthGetAllActiveDates());
+  if (!dateSet.size) return 0;
+  let streak = 0;
+  const check = new Date();
+  check.setHours(0, 0, 0, 0);
+  for (let i = 0; i < 365; i++) {
+    if (dateSet.has(getTodayKeyFromDate(check))) { streak++; check.setDate(check.getDate() - 1); }
+    else break;
+  }
+  return streak;
+}
+
+function getTodayKeyFromDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 function healthSwitchTab(tab) {
   healthActiveTab = tab;
@@ -2196,7 +2521,18 @@ function healthSwitchTab(tab) {
   document.querySelectorAll('#domain-health .screen').forEach(s => s.classList.remove('active'));
   document.getElementById(`health-screen-${tab}`)?.classList.add('active');
   if (tab === 'home')     healthRenderHome();
+  if (tab === 'history')  healthRenderHistory();
   if (tab === 'progress') healthRenderProgress();
+}
+
+function healthSwitchSubtab(subtab) {
+  healthActiveSubtab = subtab;
+  document.getElementById('health-subtab-diet').classList.toggle('active', subtab === 'diet');
+  document.getElementById('health-subtab-wellness').classList.toggle('active', subtab === 'wellness');
+  document.getElementById('health-diet-content').style.display     = subtab === 'diet' ? '' : 'none';
+  document.getElementById('health-wellness-content').style.display = subtab === 'wellness' ? '' : 'none';
+  if (subtab === 'diet') healthRenderDietTab();
+  else healthRenderWellnessTab();
 }
 
 function healthRenderHome() {
@@ -2204,22 +2540,317 @@ function healthRenderHome() {
   document.getElementById('health-today-date').textContent   = formatDateLong();
   const g = getGreeting();
   document.getElementById('health-greeting').innerHTML = `${g}, <span style="color:var(--accent-green);">Soham</span>`;
+
   const now = new Date();
-  const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay()); startOfWeek.setHours(0,0,0,0);
-  document.getElementById('health-stat-week').textContent   = healthHistory.filter(h => new Date(h.date) >= startOfWeek).length;
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+  const activeDates = healthGetAllActiveDates();
+  const thisWeek = activeDates.filter(k => {
+    const [y, m, d] = k.split('-').map(Number);
+    return new Date(y, m - 1, d) >= startOfWeek;
+  }).length;
+  document.getElementById('health-stat-week').textContent   = thisWeek;
   document.getElementById('health-stat-streak').textContent = healthGetStreak();
-  document.getElementById('health-stat-total').textContent  = healthHistory.length;
+  document.getElementById('health-stat-total').textContent  = activeDates.length;
+
+  healthSwitchSubtab(healthActiveSubtab);
 }
 
-function healthGetStreak() {
-  if (!healthHistory.length) return 0;
-  const dates = [...new Set(healthHistory.map(h => { const d = new Date(h.date); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }))].sort().reverse();
-  let streak = 0; const check = new Date();
-  for (const ds of dates) {
-    const key = `${check.getFullYear()}-${check.getMonth()}-${check.getDate()}`;
-    if (ds === key) { streak++; check.setDate(check.getDate() - 1); } else break;
+function healthRenderDietTab() {
+  const dayKey = getTodayKey();
+  const mealsDone = healthCountMealsDone(dayKey);
+  const suppsDone = healthCountSuppsDone(dayKey);
+  const suppsDue  = healthCountSuppsDue(dayKey);
+
+  let html = `<div class="stats-strip-2">
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent-green);font-size:22px;">${mealsDone} / 4</div><div class="stat-lbl">Meals Logged</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent-green);font-size:22px;">${suppsDone} / ${suppsDue}</div><div class="stat-lbl">Supplements</div></div>
+  </div>
+  <div class="section-label">TODAY'S MEALS</div>
+  <div style="padding:0 20px;display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">`;
+
+  HEALTH_DIET_PLAN.meals.forEach(meal => {
+    const st = healthGetMealState(meal.id, dayKey);
+    const isOpen = healthExpandedMeals.has(meal.id);
+    let variantHtml = '';
+    if (meal.hasVariant) {
+      variantHtml = `<div class="health-variant-toggle" onclick="event.stopPropagation()">
+        ${meal.variants.map(v => `<button class="health-vt-btn${st.variant === v ? ' active' : ''}" onclick="healthSetMealVariant('${meal.id}','${v}')">${v}</button>`).join('')}
+      </div>`;
+    }
+    let toggleHtml = '';
+    if (meal.hasToggle) {
+      toggleHtml = `<div class="health-toggle-row" onclick="event.stopPropagation()">
+        <span class="health-toggle-chip${st.smoothie ? ' on' : ''}" onclick="healthToggleMealSmoothie('${meal.id}')">+ ${meal.toggleLabel}</span>
+      </div>`;
+    }
+    const ings = meal.hasVariant ? meal.ingredients[st.variant] : meal.ingredients;
+    const sub = meal.hasVariant ? `${st.variant} · Salad · Rice/Roti` : meal.subtitle;
+
+    html += `<div class="ex-card health-meal-card${st.done ? ' completed' : ''}${isOpen ? ' open' : ''}" id="health-meal-${meal.id}">
+      <div class="ex-card-header">
+        <div class="ex-check" onclick="event.stopPropagation();healthToggleMeal('${meal.id}')">${st.done ? '✓' : ''}</div>
+        <div class="ex-header-content" onclick="healthToggleMealExpand('${meal.id}')">
+          <div class="ex-name">${meal.name}</div>
+          <div class="ex-prescription">${meal.time}</div>
+          <div class="ex-muscle">${sub}</div>
+          ${variantHtml}${toggleHtml}
+        </div>
+        <div class="ex-expand-icon" onclick="healthToggleMealExpand('${meal.id}')">▾</div>
+      </div>
+      <div class="health-meal-expand"><ul>${ings.map(i => `<li>${i}</li>`).join('')}</ul></div>
+    </div>`;
+  });
+
+  html += `</div><div class="section-label">SUPPLEMENTS</div>`;
+  document.getElementById('health-diet-content').innerHTML = html;
+
+  const strip = document.createElement('div');
+  strip.className = 'health-supp-strip';
+  HEALTH_DIET_PLAN.supplements.forEach(supp => {
+    const due = healthSupplementDue(supp, dayKey);
+    const taken = !!healthGetDietDay(dayKey).supplements[supp.id];
+    const chip = document.createElement('div');
+    if (!due) {
+      chip.className = 'health-supp-chip disabled';
+      chip.textContent = `${supp.name} · Not due`;
+    } else {
+      chip.className = `health-supp-chip${taken ? ' done' : ''}`;
+      chip.textContent = taken ? `${supp.name} ✓` : supp.name;
+      chip.onclick = () => healthToggleSupplement(supp.id);
+    }
+    strip.appendChild(chip);
+  });
+  document.getElementById('health-diet-content').appendChild(strip);
+}
+
+function healthRenderWellnessTab() {
+  const dayKey = getTodayKey();
+  const doneIds = healthWellnessLog[dayKey] || [];
+  const doneCount = doneIds.length;
+
+  let html = `<div class="stats-strip-2">
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent-green);font-size:22px;">${doneCount}</div><div class="stat-lbl">Done Today</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent-green);font-size:22px;">${HEALTH_WELLNESS_HABITS.length}</div><div class="stat-lbl">Available</div></div>
+  </div>
+  <div class="section-label">WELLNESS HABITS</div>
+  <div style="padding:0 20px;display:flex;flex-direction:column;gap:10px;">`;
+
+  HEALTH_WELLNESS_HABITS.forEach(habit => {
+    const isDone = doneIds.includes(habit.id);
+    html += `<div class="item-card${isDone ? ' done' : ''}" onclick="healthToggleWellness('${habit.id}')">
+      <div class="item-dot">${habit.icon}</div>
+      <div class="item-info">
+        <div class="item-name">${habit.name}</div>
+      </div>
+      <div class="item-right" style="color:${isDone ? 'var(--accent-green)' : 'var(--text3)'};">${isDone ? '✓ DONE' : 'TAP'}</div>
+    </div>`;
+  });
+
+  html += `</div>`;
+  document.getElementById('health-wellness-content').innerHTML = html;
+}
+
+function healthToggleMeal(mealId) {
+  const dayKey = getTodayKey();
+  const meal = HEALTH_DIET_PLAN.meals.find(m => m.id === mealId);
+  const day = healthGetDietDay(dayKey);
+  const st = healthGetMealState(mealId, dayKey);
+  const newDone = !st.done;
+
+  if (meal.hasVariant) {
+    day.meals[mealId] = { done: newDone, variant: st.variant };
+  } else if (meal.hasToggle) {
+    day.meals[mealId] = { done: newDone, smoothie: st.smoothie };
+  } else {
+    day.meals[mealId] = newDone;
   }
-  return streak;
+  saveHealthDietLog();
+  showToast(newDone ? 'MEAL LOGGED' : 'MEAL UNMARKED');
+  vibrate(newDone ? [50, 30, 50] : [10]);
+  healthRenderHome();
+}
+
+function healthSetMealVariant(mealId, variant) {
+  const dayKey = getTodayKey();
+  const day = healthGetDietDay(dayKey);
+  const st = healthGetMealState(mealId, dayKey);
+  day.meals[mealId] = { done: st.done, variant };
+  saveHealthDietLog();
+  healthRenderDietTab();
+}
+
+function healthToggleMealSmoothie(mealId) {
+  const dayKey = getTodayKey();
+  const day = healthGetDietDay(dayKey);
+  const st = healthGetMealState(mealId, dayKey);
+  day.meals[mealId] = { done: st.done, smoothie: !st.smoothie };
+  saveHealthDietLog();
+  healthRenderDietTab();
+}
+
+function healthToggleMealExpand(mealId) {
+  const card = document.getElementById(`health-meal-${mealId}`);
+  if (!card) return;
+  const isOpen = card.classList.contains('open');
+  document.querySelectorAll('#health-diet-content .ex-card.open').forEach(c => c.classList.remove('open'));
+  healthExpandedMeals.clear();
+  if (!isOpen) { card.classList.add('open'); healthExpandedMeals.add(mealId); }
+}
+
+function healthToggleSupplement(suppId) {
+  const dayKey = getTodayKey();
+  const supp = HEALTH_DIET_PLAN.supplements.find(s => s.id === suppId);
+  if (!healthSupplementDue(supp, dayKey)) return;
+  const day = healthGetDietDay(dayKey);
+  const newVal = !day.supplements[suppId];
+  day.supplements[suppId] = newVal;
+  saveHealthDietLog();
+  showToast(newVal ? 'SUPPLEMENT MARKED TAKEN' : 'SUPPLEMENT UNMARKED');
+  vibrate(newVal ? [50] : [10]);
+  healthRenderHome();
+}
+
+function healthToggleWellness(habitId) {
+  const dayKey = getTodayKey();
+  if (!healthWellnessLog[dayKey]) healthWellnessLog[dayKey] = [];
+  const idx = healthWellnessLog[dayKey].indexOf(habitId);
+  if (idx >= 0) healthWellnessLog[dayKey].splice(idx, 1);
+  else healthWellnessLog[dayKey].push(habitId);
+  if (!healthWellnessLog[dayKey].length) delete healthWellnessLog[dayKey];
+  saveHealthWellnessLog();
+  const habit = HEALTH_WELLNESS_HABITS.find(h => h.id === habitId);
+  showToast(idx >= 0 ? 'HABIT UNMARKED' : `${habit.name.toUpperCase()} DONE`);
+  vibrate(idx < 0 ? [50, 30, 50] : [10]);
+  healthRenderHome();
+}
+
+function healthBuildHistoryEntries() {
+  const entries = {};
+  const allDates = new Set([...Object.keys(healthDietLog), ...Object.keys(healthWellnessLog)]);
+  allDates.forEach(dateKey => {
+    if (!healthDayHasActivity(dateKey)) return;
+    const diet = healthDietLog[dateKey];
+    const wellness = healthWellnessLog[dateKey] || [];
+    let dietEntry = null;
+    if (diet) {
+      const hasDiet = HEALTH_DIET_PLAN.meals.some(m => {
+        const raw = diet.meals && diet.meals[m.id];
+        if (m.hasVariant || m.hasToggle) return raw && raw.done;
+        return raw === true;
+      }) || HEALTH_DIET_PLAN.supplements.some(s => diet.supplements && diet.supplements[s.id]);
+      if (hasDiet) dietEntry = diet;
+    }
+    entries[dateKey] = {
+      diet: dietEntry,
+      wellness: wellness.length ? wellness : null,
+    };
+  });
+  return entries;
+}
+
+function healthMealStateFromLog(meal, raw) {
+  let done = false, variant = null, smoothie = false;
+  if (meal.hasVariant) { done = !!(raw && raw.done); variant = (raw && raw.variant) || meal.variants[0]; }
+  else if (meal.hasToggle) { done = !!(raw && raw.done); smoothie = !!(raw && raw.smoothie); }
+  else done = raw === true;
+  return { done, variant, smoothie };
+}
+
+function healthRenderDietHistoryForDate(dietData, _allData, dateKey) {
+  if (!dietData) return '';
+  const mealStates = HEALTH_DIET_PLAN.meals.map(m => ({
+    meal: m,
+    ...healthMealStateFromLog(m, dietData.meals && dietData.meals[m.id]),
+  }));
+  const doneCount = mealStates.filter(s => s.done).length;
+  let html = `<div class="history-cat-summary">${doneCount} / 4 meals</div><div class="history-cat-chips">`;
+  mealStates.forEach(({ meal, done, variant, smoothie }) => {
+    if (!done) return;
+    let label = meal.name;
+    if (meal.id === 'm2') label = `${variant} Salad + Rice`;
+    if (meal.id === 'm4') label = `${meal.name} (${variant})`;
+    if (smoothie) label += ' + ABC Smoothie';
+    html += `<span class="h-chip" style="background:var(--accent-green-dim);color:var(--accent-green);border:1px solid var(--accent-green-border);">✓ ${label}</span>`;
+  });
+  html += `</div>`;
+  const takenSupps = HEALTH_DIET_PLAN.supplements.filter(s => dietData.supplements && dietData.supplements[s.id]);
+  if (takenSupps.length) {
+    html += `<div class="history-cat-summary" style="margin-top:8px;">Supplements</div><div class="history-cat-chips">`;
+    takenSupps.forEach(s => {
+      html += `<span class="h-chip" style="background:var(--accent-green-dim);color:var(--accent-green);border:1px solid var(--accent-green-border);">${s.name} ✓</span>`;
+    });
+    html += `</div>`;
+  }
+  return doneCount || takenSupps.length ? html : '';
+}
+
+function healthRenderWellnessHistory(wellnessIds) {
+  if (!wellnessIds || !wellnessIds.length) return '';
+  let html = `<div class="history-cat-chips">`;
+  wellnessIds.forEach(id => {
+    const habit = HEALTH_WELLNESS_HABITS.find(h => h.id === id);
+    if (!habit) return;
+    html += `<span class="h-chip" style="background:var(--accent-green-dim);color:var(--accent-green);border:1px solid var(--accent-green-border);">✓ ${habit.icon} ${habit.name}</span>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function healthRenderHistory() {
+  renderGroupedHistory('health-history-list', healthBuildHistoryEntries(), {
+    diet: (dietData, _allData, dateKey) => healthRenderDietHistoryForDate(dietData, _allData, dateKey),
+    wellness: (wellnessIds) => healthRenderWellnessHistory(wellnessIds),
+  }, ['diet', 'wellness'], {
+    selectMode: healthHistorySelectMode,
+    selectedDates: healthSelectedHistoryDates,
+    onSelect: 'healthToggleHistoryCard',
+    emptyTitle: 'No sessions yet',
+    emptySub: 'Complete your first health<br>check-in and it\'ll show here.',
+  });
+}
+
+function healthToggleHistorySelect() {
+  healthHistorySelectMode = !healthHistorySelectMode;
+  healthSelectedHistoryDates.clear();
+  const btn = document.getElementById('health-history-select-btn');
+  const del = document.getElementById('health-history-delete-btn');
+  btn.textContent = healthHistorySelectMode ? 'CANCEL' : 'SELECT';
+  btn.style.color = healthHistorySelectMode ? 'var(--accent-green)' : '';
+  del.style.display = 'none';
+  healthRenderHistory();
+}
+
+function healthToggleHistoryCard(dateKey) {
+  if (!healthHistorySelectMode) return;
+  healthSelectedHistoryDates.has(dateKey) ? healthSelectedHistoryDates.delete(dateKey) : healthSelectedHistoryDates.add(dateKey);
+  const card = document.getElementById(`hcard-${dateKey}`);
+  if (card) {
+    card.classList.toggle('selected', healthSelectedHistoryDates.has(dateKey));
+    const ind = card.querySelector('.history-select-indicator');
+    if (ind) ind.textContent = healthSelectedHistoryDates.has(dateKey) ? '✓' : '';
+  }
+  document.getElementById('health-history-delete-btn').style.display = healthSelectedHistoryDates.size > 0 ? 'flex' : 'none';
+}
+
+function healthDeleteSelectedHistory() {
+  if (!healthSelectedHistoryDates.size) return;
+  if (!confirm(`Delete ${healthSelectedHistoryDates.size} day(s)?`)) return;
+  healthSelectedHistoryDates.forEach(dateKey => {
+    delete healthDietLog[dateKey];
+    delete healthWellnessLog[dateKey];
+  });
+  saveHealthDietLog();
+  saveHealthWellnessLog();
+  healthSelectedHistoryDates.clear();
+  healthHistorySelectMode = false;
+  document.getElementById('health-history-select-btn').textContent = 'SELECT';
+  document.getElementById('health-history-select-btn').style.color = '';
+  document.getElementById('health-history-delete-btn').style.display = 'none';
+  healthRenderHistory();
+  healthRenderHome();
+  showToast('DAYS DELETED');
 }
 
 function healthRenderProgress() {
@@ -2228,25 +2859,25 @@ function healthRenderProgress() {
 
 function healthRenderContrib() {
   const container = document.getElementById('health-contrib-graph');
-  const dateSet   = new Set(healthHistory.map(h => { const d = new Date(h.date); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }));
-  const today     = new Date(); today.setHours(23,59,59,999);
-  const startDate = new Date(today); startDate.setDate(today.getDate() - 16*7+1); startDate.setDate(startDate.getDate() - startDate.getDay());
+  const activeDates = new Set(healthGetAllActiveDates());
+  const today = new Date(); today.setHours(23, 59, 59, 999);
+  const startDate = new Date(today); startDate.setDate(today.getDate() - 16 * 7 + 1); startDate.setDate(startDate.getDate() - startDate.getDay());
   const weeks = []; let current = new Date(startDate);
   while (current <= today) {
     const week = [];
     for (let d = 0; d < 7; d++) {
-      const key = `${current.getFullYear()}-${current.getMonth()}-${current.getDate()}`;
-      week.push({ level: current > today ? -1 : (dateSet.has(key) ? 3 : 0) });
+      const isoKey = getTodayKeyFromDate(current);
+      week.push({ level: current > today ? -1 : (activeDates.has(isoKey) ? 3 : 0) });
       current.setDate(current.getDate() + 1);
     }
     weeks.push(week);
   }
   let html = '<div style="display:flex;gap:0;"><div class="contrib-day-labels">';
-  ['S','M','T','W','T','F','S'].forEach((d, i) => { html += `<div class="contrib-day-label">${i%2===1?d:''}</div>`; });
+  ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach((d, i) => { html += `<div class="contrib-day-label">${i % 2 === 1 ? d : ''}</div>`; });
   html += '</div><div class="contrib-grid">';
   weeks.forEach(week => {
     html += '<div class="contrib-col">';
-    week.forEach(cell => { html += `<div class="contrib-cell${cell.level>0?' lvl'+cell.level:''}"></div>`; });
+    week.forEach(cell => { html += `<div class="contrib-cell${cell.level > 0 ? ' lvl' + cell.level : ''}"></div>`; });
     html += '</div>';
   });
   html += '</div></div>';
@@ -2257,9 +2888,15 @@ function healthRenderContrib() {
 // CAREER — DATA & STATE
 // ============================================================
 let careerHistory   = JSON.parse(localStorage.getItem('lm_career_history')) || [];
+let careerHistoryByDate = JSON.parse(localStorage.getItem('lm_career_history_by_date')) || {};
 let careerActiveTab = 'home';
+let careerHistorySelectMode  = false;
+let careerSelectedHistoryDates = new Set();
 
-function saveCareerHistory() { localStorage.setItem('lm_career_history', JSON.stringify(careerHistory)); }
+function saveCareerHistory() {
+  localStorage.setItem('lm_career_history', JSON.stringify(careerHistory));
+  localStorage.setItem('lm_career_history_by_date', JSON.stringify(careerHistoryByDate));
+}
 
 function careerSwitchTab(tab) {
   careerActiveTab = tab;
@@ -2268,7 +2905,59 @@ function careerSwitchTab(tab) {
   document.querySelectorAll('#domain-career .screen').forEach(s => s.classList.remove('active'));
   document.getElementById(`career-screen-${tab}`)?.classList.add('active');
   if (tab === 'home')     careerRenderHome();
+  if (tab === 'history')  careerRenderHistory();
   if (tab === 'progress') careerRenderProgress();
+}
+
+function careerBuildHistoryEntries() {
+  return careerHistoryByDate;
+}
+
+function careerRenderHistory() {
+  renderGroupedHistory('career-history-list', careerBuildHistoryEntries(), {}, [], {
+    selectMode: careerHistorySelectMode,
+    selectedDates: careerSelectedHistoryDates,
+    onSelect: 'careerToggleHistoryCard',
+    emptyTitle: 'No sessions yet',
+    emptySub: 'Log your first career session<br>and it\'ll show up here.',
+  });
+}
+
+function careerToggleHistorySelect() {
+  careerHistorySelectMode = !careerHistorySelectMode;
+  careerSelectedHistoryDates.clear();
+  const btn = document.getElementById('career-history-select-btn');
+  const del = document.getElementById('career-history-delete-btn');
+  btn.textContent = careerHistorySelectMode ? 'CANCEL' : 'SELECT';
+  btn.style.color = careerHistorySelectMode ? 'var(--accent-purple)' : '';
+  del.style.display = 'none';
+  careerRenderHistory();
+}
+
+function careerToggleHistoryCard(dateKey) {
+  if (!careerHistorySelectMode) return;
+  careerSelectedHistoryDates.has(dateKey) ? careerSelectedHistoryDates.delete(dateKey) : careerSelectedHistoryDates.add(dateKey);
+  const card = document.getElementById(`hcard-${dateKey}`);
+  if (card) {
+    card.classList.toggle('selected', careerSelectedHistoryDates.has(dateKey));
+    const ind = card.querySelector('.history-select-indicator');
+    if (ind) ind.textContent = careerSelectedHistoryDates.has(dateKey) ? '✓' : '';
+  }
+  document.getElementById('career-history-delete-btn').style.display = careerSelectedHistoryDates.size > 0 ? 'flex' : 'none';
+}
+
+function careerDeleteSelectedHistory() {
+  if (!careerSelectedHistoryDates.size) return;
+  if (!confirm(`Delete ${careerSelectedHistoryDates.size} day(s)?`)) return;
+  careerSelectedHistoryDates.forEach(dateKey => { delete careerHistoryByDate[dateKey]; });
+  saveCareerHistory();
+  careerSelectedHistoryDates.clear();
+  careerHistorySelectMode = false;
+  document.getElementById('career-history-select-btn').textContent = 'SELECT';
+  document.getElementById('career-history-select-btn').style.color = '';
+  document.getElementById('career-history-delete-btn').style.display = 'none';
+  careerRenderHistory();
+  showToast('DAYS DELETED');
 }
 
 function careerRenderHome() {
