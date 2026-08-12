@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
 <style>
 /* ============================================================
    DESIGN TOKENS
@@ -1215,7 +1216,10 @@ html, body { font-size: 16px; height: 100%; background: var(--bg); color: var(--
         <div>
           <div class="topbar-title">CAREER</div>
         </div>
-        <div id="career-date-display" style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;text-align:right;"></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div id="career-date-display" style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;text-align:right;"></div>
+          <button class="icon-btn" onclick="careerOpenImportModal()" title="Import YAML">📥</button>
+        </div>
       </div>
       <div class="scroll">
         <div class="home-header">
@@ -1227,7 +1231,7 @@ html, body { font-size: 16px; height: 100%; background: var(--bg); color: var(--
           <div class="stat-card"><div class="stat-val" id="career-stat-streak" style="color:var(--accent-purple);">0</div><div class="stat-lbl">Streak</div></div>
           <div class="stat-card"><div class="stat-val" id="career-stat-total" style="color:var(--accent-purple);">0</div><div class="stat-lbl">Total</div></div>
         </div>
-        <div class="section-label">TODAY'S TASKS</div>
+        <div class="section-label" id="career-tasks-label">TODAY'S TASKS</div>
         <div style="padding:0 20px;display:flex;flex-direction:column;gap:10px;" id="career-task-cards">
           <div class="empty-state">
             <div class="empty-icon">🧠</div>
@@ -1403,6 +1407,22 @@ html, body { font-size: 16px; height: 100%; background: var(--bg); color: var(--
 <!-- GYM TIMER DISPLAY + FAB -->
 <div class="timer-display" id="gym-timer-display">0:00</div>
 <button class="timer-fab" id="gym-timer-fab" onclick="gymTimerFabClick()" style="display:none;">⏱</button>
+
+<!-- CAREER IMPORT MODAL -->
+<div class="modal-overlay" id="career-import-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📥 Import Tasks</div>
+    <div class="modal-label">Paste YAML below</div>
+    <textarea class="modal-input" id="career-import-yaml" placeholder="- date: 2026-08-12
+  category: career
+  tasks:
+    - title: CS50P Lecture 3
+      status: pending" style="min-height:180px;resize:vertical;font-family:var(--font-m);font-size:13px;line-height:1.6;"></textarea>
+    <button class="modal-btn modal-btn-primary" style="background:var(--accent-purple);" onclick="careerImportYaml()">IMPORT</button>
+    <button class="modal-btn modal-btn-secondary" onclick="careerCloseImportModal()">CANCEL</button>
+  </div>
+</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -2910,16 +2930,44 @@ function careerSwitchTab(tab) {
 }
 
 function careerBuildHistoryEntries() {
-  return careerHistoryByDate;
+  const entries = {};
+  Object.keys(careerHistoryByDate).forEach(dateKey => {
+    const dayData = careerHistoryByDate[dateKey];
+    if (!dayData || !dayData.tasks || !dayData.tasks.length) return;
+    entries[dateKey] = { tasks: dayData.tasks };
+  });
+  return entries;
+}
+
+function careerRenderTasksHistory(tasks) {
+  if (!tasks || !tasks.length) return '';
+  const doneCount = tasks.filter(t => t.status === 'done').length;
+  let html = `<div class="history-cat-summary">${doneCount} / ${tasks.length} tasks done</div><div class="history-cat-chips">`;
+  tasks.forEach(t => {
+    const isDone = t.status === 'done';
+    const isPartial = t.status === 'partial';
+    const isSkipped = t.status === 'skipped';
+    let chipStyle, icon;
+    if (isDone) { chipStyle = 'background:var(--accent-purple-dim);color:var(--accent-purple);border:1px solid var(--accent-purple-border);'; icon = '✓'; }
+    else if (isPartial) { chipStyle = 'background:var(--accent-purple-dim);color:var(--accent-purple);border:1px solid var(--accent-purple-border);opacity:0.7;'; icon = '◐'; }
+    else if (isSkipped) { chipStyle = 'background:var(--surface2);color:var(--text3);border:1px solid var(--border);text-decoration:line-through;'; icon = '—'; }
+    else { chipStyle = 'background:var(--surface2);color:var(--text3);border:1px solid var(--border);'; icon = '○'; }
+    html += `<span class="h-chip" style="${chipStyle}">${icon} ${t.title}</span>`;
+  });
+  html += '</div>';
+  return html;
 }
 
 function careerRenderHistory() {
-  renderGroupedHistory('career-history-list', careerBuildHistoryEntries(), {}, [], {
+  renderGroupedHistory('career-history-list', careerBuildHistoryEntries(), {
+    tasks: (tasks) => careerRenderTasksHistory(tasks),
+  }, ['tasks'], {
     selectMode: careerHistorySelectMode,
     selectedDates: careerSelectedHistoryDates,
     onSelect: 'careerToggleHistoryCard',
     emptyTitle: 'No sessions yet',
-    emptySub: 'Log your first career session<br>and it\'ll show up here.',
+    emptySub: 'Import tasks via YAML<br>and they\'ll show up here.',
+    chipStyle: 'background:var(--accent-purple-dim);color:var(--accent-purple);border:1px solid var(--accent-purple-border);',
   });
 }
 
@@ -2965,22 +3013,212 @@ function careerRenderHome() {
   document.getElementById('career-today-date').textContent   = formatDateLong();
   const g = getGreeting();
   document.getElementById('career-greeting').innerHTML = `${g}, <span style="color:var(--accent-purple);">Soham</span>`;
+
+  // Stats from careerHistoryByDate (all dates with tasks)
+  const allDates = Object.keys(careerHistoryByDate).filter(k => {
+    const d = careerHistoryByDate[k];
+    return d && d.tasks && d.tasks.length > 0;
+  });
   const now = new Date();
   const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay()); startOfWeek.setHours(0,0,0,0);
-  document.getElementById('career-stat-week').textContent   = careerHistory.filter(h => new Date(h.date) >= startOfWeek).length;
+  const thisWeek = allDates.filter(k => {
+    const [y, m, d] = k.split('-').map(Number);
+    return new Date(y, m - 1, d) >= startOfWeek;
+  }).length;
+  document.getElementById('career-stat-week').textContent   = thisWeek;
   document.getElementById('career-stat-streak').textContent = careerGetStreak();
-  document.getElementById('career-stat-total').textContent  = careerHistory.length;
+  document.getElementById('career-stat-total').textContent  = allDates.length;
+
+  // Find active entry: most recent date <= today within 7 days
+  const todayKey = getTodayKey();
+  const todayDate = new Date(); todayDate.setHours(0,0,0,0);
+  const container = document.getElementById('career-task-cards');
+  const label = document.getElementById('career-tasks-label');
+  let activeKey = null;
+  let activeData = null;
+  const candidates = allDates.filter(k => k <= todayKey).sort().reverse();
+  if (candidates.length) {
+    const best = candidates[0];
+    const [by, bm, bd] = best.split('-').map(Number);
+    const bestDate = new Date(by, bm - 1, bd);
+    const daysDiff = Math.round((todayDate - bestDate) / 86400000);
+    if (daysDiff <= 7) {
+      activeKey = best;
+      activeData = careerHistoryByDate[best];
+    }
+  }
+
+  if (!activeData || !activeData.tasks || !activeData.tasks.length) {
+    label.textContent = "TODAY'S TASKS";
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🧠</div><div class="empty-title">No tasks for today</div><div class="empty-sub">Import tasks via the 📥 button<br>in the top bar.</div></div>`;
+    return;
+  }
+
+  // Dynamic section label
+  if (activeKey === todayKey) {
+    label.textContent = "TODAY'S TASKS";
+  } else {
+    const [ay, am, ad] = activeKey.split('-').map(Number);
+    const startStr = new Date(ay, am - 1, ad).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    label.textContent = `THIS WEEK'S TASKS · ${startStr}`;
+  }
+
+  const tasks = activeData.tasks;
+  const doneCount = tasks.filter(t => t.status === 'done').length;
+  let html = `<div class="stats-strip-2" style="padding:0 0 12px;"><div class="stat-card"><div class="stat-val" style="color:var(--accent-purple);font-size:22px;">${doneCount} / ${tasks.length}</div><div class="stat-lbl">Tasks Done</div></div></div>`;
+  tasks.forEach((task, i) => {
+    const isDone = task.status === 'done';
+    const isPartial = task.status === 'partial';
+    const isSkipped = task.status === 'skipped';
+    let borderColor = 'var(--border)';
+    let bgColor = 'var(--surface)';
+    let checkIcon = '';
+    let checkBg = '';
+    let checkBorder = 'var(--border)';
+    let nameStyle = '';
+    if (isDone) {
+      borderColor = 'var(--accent-purple-border)'; bgColor = 'var(--accent-purple-dim)';
+      checkIcon = '✓'; checkBg = 'var(--accent-purple)'; checkBorder = 'var(--accent-purple)';
+      nameStyle = 'color:var(--text2);text-decoration:line-through;text-decoration-color:var(--text3);';
+    } else if (isPartial) {
+      borderColor = 'var(--accent-purple-border)'; checkIcon = '◐'; checkBg = 'var(--accent-purple-dim)'; checkBorder = 'var(--accent-purple-border)';
+    } else if (isSkipped) {
+      checkIcon = '—'; nameStyle = 'color:var(--text3);text-decoration:line-through;text-decoration-color:var(--text3);';
+    }
+    const progressBar = typeof task.progress === 'number' && task.progress > 0 && task.status !== 'done'
+      ? `<div style="margin-top:6px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${task.progress}%;background:var(--accent-purple);border-radius:2px;"></div></div>` : '';
+    const notesHtml = task.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;">${task.notes}</div>` : '';
+    html += `<div class="item-card" style="border-color:${borderColor};background:${bgColor};" onclick="careerCycleTaskStatus('${activeKey}',${i})">
+      <div class="ex-check" style="${checkBg ? 'background:'+checkBg+';border-color:'+checkBorder+';color:#000;' : 'border-color:'+checkBorder+';'}">${checkIcon}</div>
+      <div style="flex:1;">
+        <div class="item-name" style="${nameStyle}">${task.title}</div>
+        ${notesHtml}${progressBar}
+      </div>
+      <div style="font-size:9px;letter-spacing:1px;color:var(--text3);text-transform:uppercase;">${task.status}</div>
+    </div>`;
+  });
+  container.innerHTML = html;
 }
 
 function careerGetStreak() {
-  if (!careerHistory.length) return 0;
-  const dates = [...new Set(careerHistory.map(h => { const d = new Date(h.date); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }))].sort().reverse();
-  let streak = 0; const check = new Date();
-  for (const ds of dates) {
-    const key = `${check.getFullYear()}-${check.getMonth()}-${check.getDate()}`;
-    if (ds === key) { streak++; check.setDate(check.getDate() - 1); } else break;
+  const allDates = Object.keys(careerHistoryByDate).filter(k => {
+    const d = careerHistoryByDate[k];
+    return d && d.tasks && d.tasks.length > 0;
+  });
+  if (!allDates.length) return 0;
+  const dateSet = new Set(allDates);
+  let streak = 0;
+  const check = new Date(); check.setHours(0,0,0,0);
+  for (let i = 0; i < 365; i++) {
+    if (dateSet.has(getTodayKeyFromDate(check))) { streak++; check.setDate(check.getDate() - 1); }
+    else break;
   }
   return streak;
+}
+
+function careerCycleTaskStatus(dateKey, taskIdx) {
+  const dayData = careerHistoryByDate[dateKey];
+  if (!dayData || !dayData.tasks || !dayData.tasks[taskIdx]) return;
+  const statusCycle = ['pending', 'done', 'partial', 'skipped'];
+  const current = dayData.tasks[taskIdx].status || 'pending';
+  const nextIdx = (statusCycle.indexOf(current) + 1) % statusCycle.length;
+  dayData.tasks[taskIdx].status = statusCycle[nextIdx];
+  if (statusCycle[nextIdx] === 'done') dayData.tasks[taskIdx].progress = 100;
+  saveCareerHistory();
+  const labels = { pending: 'PENDING', done: 'TASK DONE! 💪', partial: 'PARTIAL', skipped: 'SKIPPED' };
+  showToast(labels[statusCycle[nextIdx]]);
+  vibrate(statusCycle[nextIdx] === 'done' ? [50, 30, 50] : [10]);
+  careerRenderHome();
+}
+
+function careerOpenImportModal() {
+  document.getElementById('career-import-yaml').value = '';
+  document.getElementById('career-import-modal').classList.add('visible');
+}
+
+function careerCloseImportModal() {
+  document.getElementById('career-import-modal').classList.remove('visible');
+}
+
+function careerImportYaml() {
+  const raw = document.getElementById('career-import-yaml').value.trim();
+  if (!raw) { showToast('PASTE YAML FIRST'); return; }
+
+  let parsed;
+  try {
+    parsed = jsyaml.load(raw);
+  } catch (e) {
+    showToast('YAML PARSE ERROR: ' + (e.message || 'Invalid syntax').substring(0, 60));
+    return;
+  }
+
+  // Normalize: if user pastes a single object instead of array
+  if (!Array.isArray(parsed)) parsed = [parsed];
+
+  let totalImported = 0;
+  for (let di = 0; di < parsed.length; di++) {
+    const entry = parsed[di];
+    // Validate date
+    if (!entry.date) { showToast(`INVALID: entry ${di + 1} missing 'date'`); return; }
+    const dateStr = String(entry.date);
+    // Support Date objects from YAML or string dates
+    let dateKey;
+    if (entry.date instanceof Date) {
+      dateKey = getTodayKeyFromDate(entry.date);
+    } else {
+      const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (!match) { showToast(`INVALID DATE FORMAT: entry ${di + 1} — use YYYY-MM-DD`); return; }
+      dateKey = `${match[1]}-${match[2]}-${match[3]}`;
+    }
+    // Validate tasks array
+    if (!entry.tasks || !Array.isArray(entry.tasks) || !entry.tasks.length) {
+      showToast(`INVALID: entry ${di + 1} missing 'tasks' array`); return;
+    }
+    // Validate each task
+    for (let ti = 0; ti < entry.tasks.length; ti++) {
+      const task = entry.tasks[ti];
+      if (!task.title) { showToast(`INVALID: missing 'title' on task ${ti + 1} (date ${dateKey})`); return; }
+      if (!task.status) task.status = 'pending';
+      const validStatuses = ['pending', 'done', 'partial', 'skipped'];
+      if (!validStatuses.includes(task.status)) {
+        showToast(`INVALID STATUS '${task.status}' on task ${ti + 1} (date ${dateKey})`); return;
+      }
+      if (task.progress === undefined || task.progress === null) task.progress = task.status === 'done' ? 100 : 0;
+      if (!task.notes) task.notes = '';
+    }
+
+    // Merge into careerHistoryByDate — add tasks, don't overwrite entire day
+    if (!careerHistoryByDate[dateKey]) {
+      careerHistoryByDate[dateKey] = { tasks: [] };
+    }
+    entry.tasks.forEach(t => {
+      careerHistoryByDate[dateKey].tasks.push({
+        title: String(t.title),
+        status: t.status,
+        progress: Number(t.progress) || 0,
+        notes: String(t.notes || ''),
+      });
+    });
+
+    // Also push to careerHistory array for contrib-graph compat
+    const alreadyInHistory = careerHistory.some(h => {
+      const d = new Date(h.date);
+      return getTodayKeyFromDate(d) === dateKey;
+    });
+    if (!alreadyInHistory) {
+      careerHistory.push({ date: new Date(dateKey + 'T00:00:00').toISOString() });
+    }
+
+    totalImported += entry.tasks.length;
+  }
+
+  saveCareerHistory();
+  careerCloseImportModal();
+  showToast(`${totalImported} TASK${totalImported !== 1 ? 'S' : ''} IMPORTED`);
+  vibrate([50, 30, 50]);
+  careerRenderHome();
+  if (careerActiveTab === 'history') careerRenderHistory();
+  if (careerActiveTab === 'progress') careerRenderProgress();
 }
 
 function careerRenderProgress() {
@@ -2989,15 +3227,18 @@ function careerRenderProgress() {
 
 function careerRenderContrib() {
   const container = document.getElementById('career-contrib-graph');
-  const dateSet   = new Set(careerHistory.map(h => { const d = new Date(h.date); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }));
-  const today     = new Date(); today.setHours(23,59,59,999);
+  const activeDates = new Set(Object.keys(careerHistoryByDate).filter(k => {
+    const d = careerHistoryByDate[k];
+    return d && d.tasks && d.tasks.length > 0;
+  }));
+  const today = new Date(); today.setHours(23,59,59,999);
   const startDate = new Date(today); startDate.setDate(today.getDate() - 16*7+1); startDate.setDate(startDate.getDate() - startDate.getDay());
   const weeks = []; let current = new Date(startDate);
   while (current <= today) {
     const week = [];
     for (let d = 0; d < 7; d++) {
-      const key = `${current.getFullYear()}-${current.getMonth()}-${current.getDate()}`;
-      week.push({ level: current > today ? -1 : (dateSet.has(key) ? 3 : 0) });
+      const isoKey = getTodayKeyFromDate(current);
+      week.push({ level: current > today ? -1 : (activeDates.has(isoKey) ? 3 : 0) });
       current.setDate(current.getDate() + 1);
     }
     weeks.push(week);
@@ -3014,8 +3255,8 @@ function careerRenderContrib() {
   container.innerHTML = html;
 }
 
-// Close gym modals on overlay tap
-document.querySelectorAll('#gym-timer-modal, #gym-add-ex-modal, #gym-history-detail-modal, #gym-completion-modal').forEach(overlay => {
+// Close modals on overlay tap
+document.querySelectorAll('#gym-timer-modal, #gym-add-ex-modal, #gym-history-detail-modal, #gym-completion-modal, #career-import-modal').forEach(overlay => {
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('visible'); });
 });
 
